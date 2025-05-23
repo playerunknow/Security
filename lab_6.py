@@ -65,9 +65,9 @@ def decrypt_with_double_transposition(cipher, key_col, key_row):
 
 
 if __name__ == "__main__":
-    original = "Диннік Михайло Андрійович, група 12-341"
-    col_code = "2413"
-    row_code = "4123"
+    original = "Галькевич Петро Миколайович, група 12-341"
+    col_code = "2913"
+    row_code = "4193"
 
     cipher = encrypt_with_double_transposition(original, col_code, row_code)
     print("Encrypted:", cipher)

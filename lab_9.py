@@ -64,7 +64,7 @@ def rsa_decrypt(priv, code):
     return ''.join([chr(pow(num, dec_exp, mod_val)) for num in code])
 
 def run():
-    secret = " Диннік Михайло Андрійович, група 12-341"
+    secret = " Галькевич Петро Миколайович, група 12-341"
     (pub_k, priv_k), (first_p, second_p) = gen_keys(8)
 
     print(f"RSA Key Generation:")

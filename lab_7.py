@@ -29,8 +29,8 @@ def gronsfeld_transform(data, secret, is_decrypt=False):
 
 
 # Демонстрація
-message = "Диннік Михайло Андрійович, група 12-341"
-passcode = "1945"
+message = "Галькевич Петро Миколайович, група 12-341"
+passcode = "1845"
 
 encoded, log_enc = gronsfeld_transform(message, passcode)
 decoded, log_dec = gronsfeld_transform(encoded, passcode, is_decrypt=True)
