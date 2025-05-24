@@ -1,76 +1,80 @@
-def encrypt_with_double_transposition(msg, key_col, key_row):
-    kx = len(key_col)
-    ky = len(key_row)
-    total = kx * ky
+def encrypt_by_dual_swap(message, key_x, key_y):
+    length_x = len(key_x)
+    length_y = len(key_y)
+    block_size = length_x * length_y
 
-    if len(msg) < total:
-        msg += ' ' * (total - len(msg))
-    elif len(msg) > total:
-        return ''.join([encrypt_with_double_transposition(msg[i:i + total], key_col, key_row)
-                        for i in range(0, len(msg), total)])
+    if len(message) < block_size:
+        message += ' ' * (block_size - len(message))
+    elif len(message) > block_size:
+        return ''.join([
+            encrypt_by_dual_swap(message[i:i + block_size], key_x, key_y)
+            for i in range(0, len(message), block_size)
+        ])
+
+    grid = []
+    for r in range(length_y):
+        row_part = message[r * length_x:(r + 1) * length_x]
+        grid.append(list(row_part))
+
+    column_rearranged = [[''] * length_x for _ in range(length_y)]
+    for r in range(length_y):
+        for c, pos in enumerate(key_x):
+            column_rearranged[r][c] = grid[r][int(pos) - 1]
+
+    row_rearranged = [[''] * length_x for _ in range(length_y)]
+    for r, pos in enumerate(key_y):
+        for c in range(length_x):
+            row_rearranged[r][c] = column_rearranged[int(pos) - 1][c]
+
+    encrypted = ''
+    for r in range(length_y):
+        for c in range(length_x):
+            encrypted += row_rearranged[r][c]
+
+    return encrypted
+
+
+def decrypt_by_dual_swap(ciphertext, key_x, key_y):
+    columns = len(key_x)
+    rows = len(key_y)
+    block = columns * rows
+
+    if len(ciphertext) > block:
+        return ''.join([
+            decrypt_by_dual_swap(ciphertext[i:i + block], key_x, key_y)
+            for i in range(0, len(ciphertext), block)
+        ])
 
     matrix = []
-    for y in range(ky):
-        segment = msg[y * kx:(y + 1) * kx]
+    for r in range(rows):
+        segment = ciphertext[r * columns:(r + 1) * columns]
         matrix.append(list(segment))
 
-    col_swapped = [[''] * kx for _ in range(ky)]
-    for y in range(ky):
-        for x, idx in enumerate(key_col):
-            col_swapped[y][x] = matrix[y][int(idx) - 1]
+    row_sorted = [[''] * columns for _ in range(rows)]
+    for r in range(rows):
+        for c in range(columns):
+            row_sorted[int(key_y[r]) - 1][c] = matrix[r][c]
 
-    row_swapped = [[''] * kx for _ in range(ky)]
-    for y, idx in enumerate(key_row):
-        for x in range(kx):
-            row_swapped[y][x] = col_swapped[int(idx) - 1][x]
+    original_order = [[''] * columns for _ in range(rows)]
+    for r in range(rows):
+        for c in range(columns):
+            original_order[r][int(key_x[c]) - 1] = row_sorted[r][c]
 
-    result = ''
-    for y in range(ky):
-        for x in range(kx):
-            result += row_swapped[y][x]
+    decrypted = ''
+    for r in range(rows):
+        for c in range(columns):
+            decrypted += original_order[r][c]
 
-    return result
-
-
-def decrypt_with_double_transposition(cipher, key_col, key_row):
-    w = len(key_col)
-    h = len(key_row)
-    block = w * h
-
-    if len(cipher) > block:
-        return ''.join([decrypt_with_double_transposition(cipher[i:i + block], key_col, key_row)
-                        for i in range(0, len(cipher), block)])
-
-    filled = []
-    for y in range(h):
-        line = cipher[y * w:(y + 1) * w]
-        filled.append(list(line))
-
-    row_restored = [[''] * w for _ in range(h)]
-    for y in range(h):
-        for x in range(w):
-            row_restored[int(key_row[y]) - 1][x] = filled[y][x]
-
-    col_restored = [[''] * w for _ in range(h)]
-    for y in range(h):
-        for x in range(w):
-            col_restored[y][int(key_col[x]) - 1] = row_restored[y][x]
-
-    plain = ''
-    for y in range(h):
-        for x in range(w):
-            plain += col_restored[y][x]
-
-    return plain.rstrip()
+    return decrypted.rstrip()
 
 
 if __name__ == "__main__":
-    original = "Галькевич Петро Миколайович, група 12-341"
-    col_code = "2913"
-    row_code = "4193"
+    original_message = "Галькевич Петро Миколайович, група 12-341"
+    column_pattern = "2413"
+    row_pattern = "4123"
 
-    cipher = encrypt_with_double_transposition(original, col_code, row_code)
-    print("Encrypted:", cipher)
+    encrypted_result = encrypt_by_dual_swap(original_message, column_pattern, row_pattern)
+    print("Зашифрований текст:", encrypted_result)
 
-    deciphered = decrypt_with_double_transposition(cipher, col_code, row_code)
-    print("Decrypted:", deciphered)
+    decrypted_result = decrypt_by_dual_swap(encrypted_result, column_pattern, row_pattern)
+    print("Розшифрований текст:", decrypted_result)
